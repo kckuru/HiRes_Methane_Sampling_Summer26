@@ -293,9 +293,9 @@ p_CH4_SS <-
 p_CH4_TB | p_CH4_SS
 
 
-#######################
-# Concentration data #
-######################
+#########################
+# Concentration data !!!#
+#########################
 
 GHG <-
   
@@ -398,12 +398,12 @@ plot_CH4_profile <- function(data, title, color) {
     ) +
     
     geom_path(
-      linewidth = 1.4,
+      linewidth = 1.2,
       color = color
     ) +
     
     geom_point(
-      size = 3.5,
+      size = 2.5,
       color = color
     ) +
     
@@ -413,12 +413,11 @@ plot_CH4_profile <- function(data, title, color) {
       expand = c(0, 0)
     ) +
     
-    # <-- Replace your current scale_x_log10() with this
     scale_x_log10(
-      limits = c(10, 30000),
+      limits = c(5, 30000),
       breaks = c(10, 100, 1000, 10000),
       labels = scales::label_number(),
-      expand = expansion(mult = c(0.03, 0.05))
+      expand = expansion(mult = c(0.02, 0.05))
     ) +
     
     labs(
@@ -427,7 +426,6 @@ plot_CH4_profile <- function(data, title, color) {
       y = "Depth (m)"
     ) +
     
-    # <-- Replace theme_bw(base_size = 16) with this
     theme_bw(base_size = 16) +
     
     theme(
@@ -449,7 +447,7 @@ plot_CH4_profile <- function(data, title, color) {
 }
 
 # Make the two plots #
-p_CH4_TB <-
+p_June_CH4_TB <-
   
   plot_CH4_profile(
     TB_CH4_profile,
@@ -457,7 +455,7 @@ p_CH4_TB <-
     "#2C7FB8"
   )
 
-p_CH4_SS <-
+p_June_CH4_SS <-
   
   plot_CH4_profile(
     SS_CH4_profile,
@@ -472,5 +470,120 @@ p_CH4_SS <-
   )
 
 # Combine plots #
-p_CH4_TB | p_CH4_SS
+(p_June_CH4_TB | p_June_CH4_SS) +
+  plot_layout(widths = c(1, 1))
+
+
+##########################
+# Non-log-scale version #
+#########################
+plot_CH4_profile <- function(data, title, color, log_scale = TRUE) {
+  
+  p <-
+    
+    ggplot(data, aes(x = CH4_mean, y = Depth)) +
+    
+    geom_errorbar(
+      aes(
+        xmin = CH4_mean - CH4_se,
+        xmax = CH4_mean + CH4_se
+      ),
+      width = 0,
+      linewidth = 0.6,
+      color = color
+    ) +
+    
+    geom_path(
+      linewidth = 1.2,
+      color = color
+    ) +
+    
+    geom_point(
+      size = 2.5,
+      color = color
+    ) +
+    
+    scale_y_reverse(
+      limits = c(6.5, 0.5),
+      breaks = seq(0.5, 6.5, by = 0.5),
+      expand = c(0, 0)
+    ) +
+    
+    labs(
+      title = title,
+      x = expression(CH[4]~"(ppmv)"),
+      y = "Depth (m)"
+    ) +
+    
+    theme_bw(base_size = 16) +
+    
+    theme(
+      
+      plot.title = element_text(
+        hjust = 0.5,
+        face = "bold"
+      ),
+      
+      axis.title = element_text(size = 18),
+      
+      axis.text = element_text(size = 14),
+      
+      panel.grid.minor = element_blank(),
+      
+      aspect.ratio = 1
+      
+    )
+  
+  if (log_scale) {
+    
+    p <- p +
+      
+      scale_x_log10(
+        limits = c(5, 30000),
+        breaks = c(10, 100, 1000, 10000),
+        labels = scales::label_number(),
+        expand = expansion(mult = c(0.02, 0.05))
+      )
+    
+  } else {
+    
+    p <- p +
+      
+      scale_x_continuous(
+        limits = c(0, 20000),
+        breaks = seq(0, 20000, by = 5000),
+        expand = expansion(mult = c(0, 0.02))
+      )
+    
+  }
+  
+  p
+}
+
+p_June_CH4_TB_linear <-
+  
+  plot_CH4_profile(
+    TB_CH4_profile,
+    "Trout Bog",
+    "#2C7FB8",
+    log_scale = FALSE
+  )
+
+p_June_CH4_SS_linear <-
+  
+  plot_CH4_profile(
+    SS_CH4_profile,
+    "South Sparkling Bog",
+    "#D95F02",
+    log_scale = FALSE
+  ) +
+  
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+(p_June_CH4_TB_linear | p_June_CH4_SS_linear) +
+  plot_layout(widths = c(1, 1))
 
